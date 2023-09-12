@@ -38,13 +38,36 @@ namespace EshopApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EshopApi", Version = "v1" });
+                // Include 'SecurityScheme' to use JWT Authentication
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    BearerFormat = "JWT",
+                    Name = "JWT Authentication",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
+
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+
+                c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
             });
 
             services.AddDbContext<EshopApi_DBContext>(options => { options.UseSqlServer("Server=.;Database=EshopApi_DB;Trusted_Connection=True;"); });
 
             #region IoC
-                services.AddTransient<ICustomerRepository, CustomerRepository>();
-                services.AddTransient<IProductRepository, ProductsRepository>();
+            services.AddTransient<ICustomerRepository, CustomerRepository>();
+            services.AddTransient<IProductRepository, ProductsRepository>();
             #endregion 
 
             services.AddResponseCaching();
